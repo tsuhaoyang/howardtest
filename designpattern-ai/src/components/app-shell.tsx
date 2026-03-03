@@ -1,9 +1,11 @@
 "use client";
 
 import { Sidebar } from "@/components/sidebar";
+import { ArchitectChat } from "@/components/chat/architect-chat";
 import { usePatternStore } from "@/store/pattern-store";
 import { PanelLeftClose, PanelLeft, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { PatternMeta } from "@/store/pattern-store";
 
 interface AppShellProps {
@@ -12,7 +14,8 @@ interface AppShellProps {
 }
 
 export function AppShell({ patterns, children }: AppShellProps) {
-  const { sidebarOpen, toggleSidebar } = usePatternStore();
+  const { sidebarOpen, chatOpen, toggleSidebar, toggleChat } =
+    usePatternStore();
 
   return (
     <div className="flex h-screen overflow-hidden bg-background grid-bg">
@@ -41,8 +44,14 @@ export function AppShell({ patterns, children }: AppShellProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="text-muted-foreground hover:text-neon-purple"
-              title="Architect Chat (coming soon)"
+              onClick={toggleChat}
+              className={cn(
+                "transition-colors",
+                chatOpen
+                  ? "text-neon-purple"
+                  : "text-muted-foreground hover:text-neon-purple"
+              )}
+              title="Ask The Architect"
             >
               <MessageSquare className="w-5 h-5" />
             </Button>
@@ -51,6 +60,8 @@ export function AppShell({ patterns, children }: AppShellProps) {
 
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
+
+      <ArchitectChat />
     </div>
   );
 }
