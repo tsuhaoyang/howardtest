@@ -1,0 +1,69 @@
+---
+title: "Adapter"
+category: "structural"
+complexity: 1
+description: "Convert the interface of a class into another interface clients expect. Lets classes work together that couldn't otherwise."
+icon: "cable"
+---
+
+## Intent
+
+The **Adapter** pattern allows objects with incompatible interfaces to collaborate. It wraps an existing class with a new interface so that it becomes compatible with the client's expected interface.
+
+## When to Use
+
+- When you want to use an **existing class** but its interface isn't compatible with the rest of your code
+- When you need to create a **reusable class** that cooperates with unrelated or unforeseen classes
+- Common in: **Third-party API integrations**, **Legacy code migration**, **Data format conversion**
+
+## TypeScript Implementation
+
+```typescript
+interface MediaPlayer {
+  play(filename: string): string;
+}
+
+class ModernPlayer implements MediaPlayer {
+  play(filename: string): string {
+    return `Playing MP4: ${filename}`;
+  }
+}
+
+class LegacyAudioSystem {
+  playWav(file: string): string {
+    return `Legacy WAV playback: ${file}`;
+  }
+}
+
+class LegacyAdapter implements MediaPlayer {
+  constructor(private legacy: LegacyAudioSystem) {}
+
+  play(filename: string): string {
+    const wavFile = filename.replace(/\.\w+$/, ".wav");
+    return this.legacy.playWav(wavFile);
+  }
+}
+
+// Usage
+function startPlayback(player: MediaPlayer, file: string) {
+  return player.play(file);
+}
+
+const modern = new ModernPlayer();
+console.log(startPlayback(modern, "song.mp4"));
+
+const adapted = new LegacyAdapter(new LegacyAudioSystem());
+console.log(startPlayback(adapted, "song.mp3"));
+```
+
+## Pros & Cons
+
+| Pros | Cons |
+|------|------|
+| Single Responsibility: separate conversion logic | Overall complexity increases with adapters |
+| Open/Closed: add new adapters without modifying client | Sometimes simpler to change the service class |
+| Promotes reusability of existing functionality | Can obscure the underlying implementation |
+
+## Real-World Analogy
+
+Think of a **power plug adapter** when travelling internationally. Your laptop charger (US plug) doesn't fit into a European outlet. An adapter sits between them, converting the interface without modifying either the charger or the outlet.

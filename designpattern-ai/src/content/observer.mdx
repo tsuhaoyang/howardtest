@@ -1,0 +1,73 @@
+---
+title: "Observer"
+category: "behavioral"
+complexity: 2
+description: "Define a one-to-many dependency so that when one object changes state, all dependents are notified."
+icon: "eye"
+---
+
+## Intent
+
+The **Observer** pattern defines a subscription mechanism that lets multiple objects listen for and react to events happening in another object. It's the backbone of event-driven architectures.
+
+## When to Use
+
+- When changes in one object require **changing others**, and you don't know how many objects need to change
+- When an object should **notify other objects** without assumptions about who those objects are
+- Common in: **Event systems**, **UI frameworks (React!)**, **Pub/Sub messaging**, **Real-time data feeds**
+
+## TypeScript Implementation
+
+```typescript
+interface Observer<T> {
+  update(data: T): void;
+}
+
+class EventEmitter<T> {
+  private observers: Set<Observer<T>> = new Set();
+
+  subscribe(observer: Observer<T>): () => void {
+    this.observers.add(observer);
+    return () => this.observers.delete(observer);
+  }
+
+  notify(data: T): void {
+    this.observers.forEach((observer) => observer.update(data));
+  }
+}
+
+// Usage
+class PriceDisplay implements Observer<number> {
+  constructor(private name: string) {}
+  update(price: number): void {
+    console.log(`${this.name}: Price updated to $${price}`);
+  }
+}
+
+const ticker = new EventEmitter<number>();
+const display1 = new PriceDisplay("Dashboard");
+const display2 = new PriceDisplay("Mobile App");
+
+const unsub1 = ticker.subscribe(display1);
+ticker.subscribe(display2);
+
+ticker.notify(142.5);
+// Dashboard: Price updated to $142.5
+// Mobile App: Price updated to $142.5
+
+unsub1();
+ticker.notify(145.0);
+// Mobile App: Price updated to $145.0
+```
+
+## Pros & Cons
+
+| Pros | Cons |
+|------|------|
+| Open/Closed Principle: new subscribers without modifying publisher | Subscribers notified in random order |
+| Establish relations at runtime | Can cause memory leaks if not unsubscribed |
+| Loose coupling between subject and observers | Complex debugging with many observers |
+
+## Real-World Analogy
+
+Think of a **newspaper subscription**. You don't go to the publisher every day to check for a new edition. Instead, the publisher maintains a subscriber list and delivers new editions to everyone on that list automatically.

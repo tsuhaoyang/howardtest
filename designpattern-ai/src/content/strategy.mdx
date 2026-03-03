@@ -1,0 +1,85 @@
+---
+title: "Strategy"
+category: "behavioral"
+complexity: 1
+description: "Define a family of algorithms, encapsulate each one, and make them interchangeable at runtime."
+icon: "route"
+---
+
+## Intent
+
+The **Strategy** pattern lets you define a family of algorithms, put each of them into a separate class, and make their objects interchangeable. It lets the algorithm vary independently from clients that use it.
+
+## When to Use
+
+- When you need **different variants** of an algorithm and want to switch between them at runtime
+- When you have a lot of **similar classes** that only differ in how they execute some behavior
+- Common in: **Sorting algorithms**, **Payment processing**, **Compression strategies**, **Route calculation**
+
+## TypeScript Implementation
+
+```typescript
+interface SortStrategy<T> {
+  sort(data: T[]): T[];
+  name: string;
+}
+
+class BubbleSort<T> implements SortStrategy<T> {
+  name = "Bubble Sort";
+  sort(data: T[]): T[] {
+    const arr = [...data];
+    for (let i = 0; i < arr.length; i++) {
+      for (let j = 0; j < arr.length - i - 1; j++) {
+        if (arr[j] > arr[j + 1]) {
+          [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+        }
+      }
+    }
+    return arr;
+  }
+}
+
+class QuickSort<T> implements SortStrategy<T> {
+  name = "Quick Sort";
+  sort(data: T[]): T[] {
+    if (data.length <= 1) return data;
+    const pivot = data[0];
+    const left = data.slice(1).filter((x) => x <= pivot);
+    const right = data.slice(1).filter((x) => x > pivot);
+    return [...this.sort(left), pivot, ...this.sort(right)];
+  }
+}
+
+class DataProcessor<T> {
+  constructor(private strategy: SortStrategy<T>) {}
+
+  setStrategy(strategy: SortStrategy<T>): void {
+    this.strategy = strategy;
+  }
+
+  process(data: T[]): T[] {
+    console.log(`Using: ${this.strategy.name}`);
+    return this.strategy.sort(data);
+  }
+}
+
+// Usage
+const processor = new DataProcessor(new BubbleSort<number>());
+console.log(processor.process([5, 3, 8, 1])); // [1, 3, 5, 8]
+
+processor.setStrategy(new QuickSort<number>());
+console.log(processor.process([5, 3, 8, 1])); // [1, 3, 5, 8]
+```
+
+## Pros & Cons
+
+| Pros | Cons |
+|------|------|
+| Swap algorithms at runtime | Clients must be aware of different strategies |
+| Isolate implementation details | Overkill for few algorithm variants |
+| Open/Closed Principle | Functional alternatives (lambdas) may suffice |
+| Replace inheritance with composition | Increases number of objects |
+
+## Real-World Analogy
+
+Consider **getting to the airport**. You can drive, take a taxi, cycle, or use public transit. Each is a different *strategy* for the same goal. Depending on budget, time, and luggage, you pick the best strategy — and you can switch mid-trip if needed.

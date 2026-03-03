@@ -1,0 +1,84 @@
+---
+title: "Singleton"
+category: "creational"
+complexity: 1
+description: "Ensure a class has only one instance and provide a global point of access to it."
+icon: "diamond"
+---
+
+## Intent
+
+The **Singleton** pattern ensures a class has only one instance while providing a global access point to that instance. It's one of the simplest design patterns, yet one of the most frequently misused.
+
+## When to Use
+
+- When exactly **one instance** of a class is needed to coordinate actions across a system
+- When you need **stricter control** over global variables
+- Common in: **Database connections**, **Configuration managers**, **Logger services**, **Thread pools**
+
+## Structure
+
+```
+┌─────────────────────────────────┐
+│           Singleton             │
+├─────────────────────────────────┤
+│ - instance: Singleton           │
+│ - data: any                     │
+├─────────────────────────────────┤
+│ - constructor()                 │
+│ + static getInstance(): Singleton│
+│ + getData(): any                │
+└─────────────────────────────────┘
+```
+
+## TypeScript Implementation
+
+```typescript
+class ConfigManager {
+  private static instance: ConfigManager;
+  private config: Map<string, string>;
+
+  private constructor() {
+    this.config = new Map();
+    this.loadDefaults();
+  }
+
+  static getInstance(): ConfigManager {
+    if (!ConfigManager.instance) {
+      ConfigManager.instance = new ConfigManager();
+    }
+    return ConfigManager.instance;
+  }
+
+  private loadDefaults(): void {
+    this.config.set("theme", "dark");
+    this.config.set("language", "en");
+  }
+
+  get(key: string): string | undefined {
+    return this.config.get(key);
+  }
+
+  set(key: string, value: string): void {
+    this.config.set(key, value);
+  }
+}
+
+// Usage
+const config1 = ConfigManager.getInstance();
+const config2 = ConfigManager.getInstance();
+console.log(config1 === config2); // true
+```
+
+## Pros & Cons
+
+| Pros | Cons |
+|------|------|
+| Controlled access to sole instance | Violates Single Responsibility Principle |
+| Reduced namespace pollution | Can mask bad design (tight coupling) |
+| Permits refinement of operations | Difficult to unit test (global state) |
+| Lazy initialization possible | Can cause issues in multithreaded contexts |
+
+## Real-World Analogy
+
+Think of a **government** — a country has exactly one official government at a time. No matter where citizens access it from (tax office, passport office, etc.), they're interacting with the same governing body. The government provides a global access point (`Government.getInstance()`) to its services.
