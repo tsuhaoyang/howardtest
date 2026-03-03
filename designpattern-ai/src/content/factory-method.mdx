@@ -1,0 +1,77 @@
+---
+title: "Factory Method"
+category: "creational"
+complexity: 2
+description: "Define an interface for creating objects, but let subclasses decide which class to instantiate."
+icon: "factory"
+---
+
+## Intent
+
+The **Factory Method** pattern provides an interface for creating objects in a superclass, but allows subclasses to alter the type of objects that will be created. It promotes loose coupling by eliminating the need to bind application-specific classes into your code.
+
+## When to Use
+
+- When a class **can't anticipate** the class of objects it must create
+- When a class wants its **subclasses to specify** the objects it creates
+- Common in: **UI component libraries**, **Plugin systems**, **Database drivers**, **Payment gateways**
+
+## TypeScript Implementation
+
+```typescript
+interface Transport {
+  deliver(): string;
+}
+
+class Truck implements Transport {
+  deliver(): string {
+    return "Delivering by land in a box";
+  }
+}
+
+class Ship implements Transport {
+  deliver(): string {
+    return "Delivering by sea in a container";
+  }
+}
+
+abstract class Logistics {
+  abstract createTransport(): Transport;
+
+  planDelivery(): string {
+    const transport = this.createTransport();
+    return transport.deliver();
+  }
+}
+
+class RoadLogistics extends Logistics {
+  createTransport(): Transport {
+    return new Truck();
+  }
+}
+
+class SeaLogistics extends Logistics {
+  createTransport(): Transport {
+    return new Ship();
+  }
+}
+
+// Usage
+const road = new RoadLogistics();
+console.log(road.planDelivery()); // "Delivering by land in a box"
+
+const sea = new SeaLogistics();
+console.log(sea.planDelivery()); // "Delivering by sea in a container"
+```
+
+## Pros & Cons
+
+| Pros | Cons |
+|------|------|
+| Avoid tight coupling between creator and products | Code may become more complicated (many subclasses) |
+| Single Responsibility: move creation code to one place | Requires subclassing for each product type |
+| Open/Closed: introduce new types without breaking code | Clients might need to subclass the creator class |
+
+## Real-World Analogy
+
+Consider a **hiring agency**. A company (the client) doesn't interview candidates directly. Instead, it tells the agency what role it needs filled (the factory method), and the agency produces the right type of employee. The company works with the employee through a standard contract (interface) regardless of their specialization.

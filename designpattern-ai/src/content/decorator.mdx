@@ -1,0 +1,67 @@
+---
+title: "Decorator"
+category: "structural"
+complexity: 2
+description: "Attach additional responsibilities to objects dynamically. A flexible alternative to subclassing."
+icon: "layers"
+---
+
+## Intent
+
+The **Decorator** pattern lets you attach new behaviors to objects by placing them inside wrapper objects that contain the behaviors. It's a structural pattern that provides a flexible alternative to subclassing for extending functionality.
+
+## When to Use
+
+- When you need to **add responsibilities** to objects dynamically and transparently
+- When extension by **subclassing is impractical** (too many combinations)
+- Common in: **Stream I/O wrappers**, **Middleware pipelines**, **UI component enhancement**, **Logging wrappers**
+
+## TypeScript Implementation
+
+```typescript
+interface Coffee {
+  cost(): number;
+  description(): string;
+}
+
+class SimpleCoffee implements Coffee {
+  cost(): number { return 2; }
+  description(): string { return "Simple coffee"; }
+}
+
+abstract class CoffeeDecorator implements Coffee {
+  constructor(protected coffee: Coffee) {}
+  abstract cost(): number;
+  abstract description(): string;
+}
+
+class MilkDecorator extends CoffeeDecorator {
+  cost(): number { return this.coffee.cost() + 0.5; }
+  description(): string { return `${this.coffee.description()}, milk`; }
+}
+
+class SugarDecorator extends CoffeeDecorator {
+  cost(): number { return this.coffee.cost() + 0.25; }
+  description(): string { return `${this.coffee.description()}, sugar`; }
+}
+
+// Usage — stack decorators dynamically
+let coffee: Coffee = new SimpleCoffee();
+coffee = new MilkDecorator(coffee);
+coffee = new SugarDecorator(coffee);
+console.log(coffee.description()); // "Simple coffee, milk, sugar"
+console.log(coffee.cost());        // 2.75
+```
+
+## Pros & Cons
+
+| Pros | Cons |
+|------|------|
+| Extend behavior without subclassing | Many small objects can be hard to debug |
+| Add/remove responsibilities at runtime | Order of wrapping matters |
+| Combine several behaviors via wrapping | Initial configuration code can look ugly |
+| Single Responsibility Principle | Hard to remove a specific wrapper later |
+
+## Real-World Analogy
+
+Think of **wearing clothes**. You start with a base layer (t-shirt), then add a sweater, then a jacket. Each layer *decorates* you with additional warmth without modifying the layers underneath. You can add or remove layers independently.
