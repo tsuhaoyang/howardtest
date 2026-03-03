@@ -6,6 +6,7 @@ import { AppShell } from "@/components/app-shell";
 import { PatternDetailHeader } from "@/components/pattern-detail-header";
 import { PatternVisualizer } from "@/components/visualizer/pattern-visualizer";
 import { mdxComponents } from "@/components/mdx-components";
+import { PatternContextTracker } from "@/components/pattern-context-tracker";
 
 interface PatternPageProps {
   params: Promise<{ slug: string }>;
@@ -39,6 +40,7 @@ export default async function PatternPage({ params }: PatternPageProps) {
 
   return (
     <AppShell patterns={allPatterns}>
+      <PatternContextTracker slug={pattern.meta.slug} />
       <div className="p-8 max-w-4xl mx-auto">
         <PatternDetailHeader meta={pattern.meta} />
 
