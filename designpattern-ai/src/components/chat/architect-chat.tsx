@@ -39,11 +39,19 @@ export function ArchitectChat() {
   const { messages, sendMessage, status, error, clearError } = useChat({
     transport,
     onError: (err) => {
+      const msg = String(err.message ?? err);
       try {
-        const parsed = JSON.parse(err.message);
-        setApiError(parsed.error || err.message);
+        const parsed = JSON.parse(msg);
+        const errVal = parsed.error;
+        if (typeof errVal === "string") {
+          setApiError(errVal);
+        } else if (errVal && typeof errVal === "object" && errVal.message) {
+          setApiError(String(errVal.message));
+        } else {
+          setApiError(msg);
+        }
       } catch {
-        setApiError(err.message);
+        setApiError(msg);
       }
     },
   });
@@ -95,8 +103,10 @@ export function ArchitectChat() {
     }
   };
 
-  const displayError = apiError || (error ? error.message : null);
-  const isApiKeyMissing = displayError?.includes("OPENAI_API_KEY");
+  const rawError = apiError || (error ? String(error.message ?? error) : null);
+  const displayError = typeof rawError === "string" ? rawError : rawError ? String(rawError) : null;
+  const isApiKeyMissing = displayError?.includes("OPENAI_API_KEY") ?? false;
+  const isQuotaError = displayError?.includes("insufficient_quota") ?? false;
 
   return (
     <AnimatePresence>
@@ -176,7 +186,7 @@ export function ArchitectChat() {
                   animate={{ opacity: 1, y: 0 }}
                   className={cn(
                     "rounded-xl p-4 border",
-                    isApiKeyMissing
+                    isApiKeyMissing || isQuotaError
                       ? "bg-yellow-500/5 border-yellow-500/20"
                       : "bg-destructive/5 border-destructive/20"
                   )}
@@ -185,7 +195,7 @@ export function ArchitectChat() {
                     <AlertTriangle
                       className={cn(
                         "w-5 h-5 flex-shrink-0 mt-0.5",
-                        isApiKeyMissing
+                        isApiKeyMissing || isQuotaError
                           ? "text-yellow-500"
                           : "text-destructive"
                       )}
@@ -194,14 +204,16 @@ export function ArchitectChat() {
                       <p
                         className={cn(
                           "text-sm font-medium mb-1",
-                          isApiKeyMissing
+                          isApiKeyMissing || isQuotaError
                             ? "text-yellow-500"
                             : "text-destructive"
                         )}
                       >
                         {isApiKeyMissing
                           ? "API Key Required"
-                          : "Connection Error"}
+                          : isQuotaError
+                            ? "Insufficient API Quota"
+                            : "Connection Error"}
                       </p>
                       <p className="text-xs text-muted-foreground leading-relaxed">
                         {isApiKeyMissing ? (
@@ -220,8 +232,16 @@ export function ArchitectChat() {
                               Then restart the dev server.
                             </span>
                           </>
+                        ) : isQuotaError ? (
+                          <>
+                            Your OpenAI API key has insufficient credits. Please
+                            add billing at{" "}
+                            <code className="bg-primary/10 text-primary px-1 rounded">
+                              platform.openai.com/settings/organization/billing
+                            </code>
+                          </>
                         ) : (
-                          displayError
+                          String(displayError)
                         )}
                       </p>
                     </div>

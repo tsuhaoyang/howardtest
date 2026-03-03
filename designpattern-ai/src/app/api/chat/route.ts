@@ -1,4 +1,4 @@
-import { streamText } from "ai";
+import { streamText, convertToModelMessages } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { SYSTEM_PROMPT, buildContextPrompt } from "@/lib/ai-prompts";
 
@@ -18,10 +18,12 @@ export async function POST(req: Request) {
   const systemMessage =
     SYSTEM_PROMPT + buildContextPrompt(patternContext ?? null);
 
+  const modelMessages = await convertToModelMessages(messages);
+
   const result = streamText({
     model: openai("gpt-4o-mini"),
     system: systemMessage,
-    messages,
+    messages: modelMessages,
   });
 
   return result.toUIMessageStreamResponse();
