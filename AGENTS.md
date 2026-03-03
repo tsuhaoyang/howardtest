@@ -6,9 +6,19 @@ This repository contains **DesignPattern.ai**, a Next.js 16 (App Router) interac
 
 | Service | Command | Port |
 |---------|---------|------|
-| Next.js dev server | `npm run dev` (from `designpattern-ai/`) | 3000 |
+| App (Docker) | `docker compose up` (from `designpattern-ai/`) | 3000 |
+| App (local dev) | `npm run dev` (from `designpattern-ai/`) | 3000 |
 
-### Key commands
+### Running with Docker (preferred)
+
+```
+cd designpattern-ai
+docker compose up --build
+```
+
+To pass the OpenAI API key, create `designpattern-ai/.env.local` with `OPENAI_API_KEY=sk-...` before running. The compose file picks it up automatically.
+
+### Key commands (local dev, without Docker)
 
 - **Dev**: `npm run dev` — starts Next.js dev server with Turbopack
 - **Build**: `npm run build` — production build
@@ -17,6 +27,7 @@ This repository contains **DesignPattern.ai**, a Next.js 16 (App Router) interac
 
 ### Caveats
 
+- The `Dockerfile` uses a multi-stage build (deps → builder → runner) with Next.js `output: "standalone"` for a minimal production image.
 - Uses `next-mdx-remote/rsc` (RSC approach) for MDX rendering; do NOT use the legacy `serialize` + client `MDXRemote` approach, as it fails with React 19.
 - Dark mode is enforced via `className="dark"` on the `<html>` element in `layout.tsx`.
 - Pattern content lives in `src/content/*.mdx` with gray-matter frontmatter; new patterns auto-appear in sidebar/dashboard.
